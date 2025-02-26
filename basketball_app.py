@@ -14,7 +14,7 @@ This app performs simple webscraping of NBA player stats data!
 """)
 
 st.sidebar.header('User Input Features')
-selected_year = st.sidebar.selectbox('Year', list(reversed(range(1950, 2024))))
+selected_year = st.sidebar.selectbox('Year', list(reversed(range(1950, 2025))))
 
 # Web scraping of NBA player stats
 @st.cache_data  # Updated caching mechanism
@@ -24,8 +24,8 @@ def load_data(year):
     df = html[0]
     raw = df.drop(df[df.Age == 'Age'].index)  # Deletes repeating headers in content
     raw = raw.fillna(0)
-    if 'Tm' not in raw.columns:
-        st.error(f"'Tm' column not found in the data. Columns available: {raw.columns}")
+    if 'Team' not in raw.columns:
+        st.error(f"'Team' column not found in the data. Columns available: {raw.columns}")
         return pd.DataFrame()  # Return an empty DataFrame if the column is missing
     playerstats = raw.drop(['Rk'], axis=1)
     return playerstats
@@ -37,8 +37,8 @@ if playerstats.empty:
     st.error("Failed to load data. Please check the website structure or try another year.")
 else:
     # Sidebar - Team selection
-    if 'Tm' in playerstats.columns:
-        sorted_unique_team = sorted(playerstats.Tm.unique())
+    if 'Team' in playerstats.columns:
+        sorted_unique_team = sorted(playerstats.Team.unique())
         selected_team = st.sidebar.multiselect('Team', sorted_unique_team, sorted_unique_team)
     else:
         st.warning("Team data not available. Skipping team filtering.")
@@ -50,7 +50,7 @@ else:
 
     # Filtering data
     if selected_team:
-        df_selected_team = playerstats[(playerstats.Tm.isin(selected_team)) & (playerstats.Pos.isin(selected_pos))]
+        df_selected_team = playerstats[(playerstats.Team.isin(selected_team)) & (playerstats.Pos.isin(selected_pos))]
     else:
         df_selected_team = playerstats[playerstats.Pos.isin(selected_pos)]
 
