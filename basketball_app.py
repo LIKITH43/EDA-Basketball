@@ -14,10 +14,10 @@ This app performs simple webscraping of NBA player stats data!
 """)
 
 st.sidebar.header('User Input Features')
-selected_year = st.sidebar.selectbox('Year', list(reversed(range(1950, 2025))))
+selected_year = st.sidebar.selectbox('Year', list(reversed(range(1950, 2024))))
 
 # Web scraping of NBA player stats
-@st.cache
+@st.cache_data  # Updated caching mechanism
 def load_data(year):
     url = "https://www.basketball-reference.com/leagues/NBA_" + str(year) + "_per_game.html"
     html = pd.read_html(url, header=0)
