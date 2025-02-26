@@ -17,18 +17,25 @@ st.sidebar.header('User Input Features')
 selected_year = st.sidebar.selectbox('Year', list(reversed(range(1950, 2025))))
 
 # Web scraping of NBA player stats
-@st.cache_data  # Updated caching mechanism
+@st.cache_data
 def load_data(year):
     url = "https://www.basketball-reference.com/leagues/NBA_" + str(year) + "_per_game.html"
-    html = pd.read_html(url, header=0)
-    df = html[0]
-    raw = df.drop(df[df.Age == 'Age'].index)  # Deletes repeating headers in content
-    raw = raw.fillna(0)
-    if 'Team' not in raw.columns:
-        st.error(f"'Team' column not found in the data. Columns available: {raw.columns}")
-        return pd.DataFrame()  # Return an empty DataFrame if the column is missing
-    playerstats = raw.drop(['Rk'], axis=1)
-    return playerstats
+    try:
+        html = pd.read_html(url, header=0, match="Per Game")  # Ensure the correct table is scraped
+        df = html[0]
+        print("Raw data columns:", df.columns)  # Debug column names
+        raw = df.drop(df[df.Age == 'Age'].index)  # Deletes repeating headers in content
+        raw = raw.fillna(0)
+        if 'Team' not in raw.columns:
+            st.error(f"'Team' column not found in the data. Columns available: {raw.columns}")
+            return pd.DataFrame()  # Return an empty DataFrame if the column is missing
+        # Ensure the 'Team' column contains only strings
+        raw['Team'] = raw['Team'].astype(str)
+        playerstats = raw.drop(['Rk'], axis=1)
+        return playerstats
+    except Exception as e:
+        st.error(f"Failed to load data: {e}")
+        return pd.DataFrame()  # Return an empty DataFrame if scraping fails
 
 playerstats = load_data(selected_year)
 
