@@ -31,6 +31,9 @@ def load_data(year):
             return pd.DataFrame()  # Return an empty DataFrame if the column is missing
         # Ensure the 'Team' column contains only strings
         raw['Team'] = raw['Team'].astype(str)
+        # Ensure the 'Awards' column contains only strings
+        if 'Awards' in raw.columns:
+            raw['Awards'] = raw['Awards'].astype(str)
         playerstats = raw.drop(['Rk'], axis=1)
         return playerstats
     except Exception as e:
@@ -87,8 +90,8 @@ else:
             mask = np.zeros_like(corr)
             mask[np.triu_indices_from(mask)] = True
             with sns.axes_style("white"):
-                f, ax = plt.subplots(figsize=(7, 5))
-                ax = sns.heatmap(corr, mask=mask, vmax=1, square=True)
-            st.pyplot()
+                fig, ax = plt.subplots(figsize=(7, 5))  # Create a figure explicitly
+                sns.heatmap(corr, mask=mask, vmax=1, square=True, ax=ax)
+            st.pyplot(fig)  # Pass the figure to st.pyplot()
         else:
             st.warning("No numeric data available for correlation heatmap.")
